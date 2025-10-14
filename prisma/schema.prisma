@@ -1,0 +1,29 @@
+// Prisma Schema 定义
+// 数据库配置文件
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// 短链接数据表
+model Link {
+  /// 主键自增
+  id          Int      @id @default(autoincrement())
+  /// 原始链接地址
+  originalUrl String   @db.VarChar(2000)
+  /// 短链接代码（唯一标识）
+  shortCode   String   @unique @db.VarChar(20)
+  /// 创建时间
+  createdAt   DateTime @default(now())
+  /// 访问次数（可选扩展功能）
+  visitCount  Int      @default(0)
+
+  @@map("links")
+  @@index([shortCode])
+}
+
