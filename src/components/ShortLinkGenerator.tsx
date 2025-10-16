@@ -88,7 +88,7 @@ export default function ShortLinkGenerator() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com/your/long/url"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-gray-800"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
               disabled={loading}
             />
           </div>
@@ -112,7 +112,7 @@ export default function ShortLinkGenerator() {
               role="switch"
               aria-checked={withQr}
               onClick={() => setWithQr(!withQr)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${withQr ? 'bg-[#6a0e95]' : 'bg-gray-300'
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${withQr ? 'bg-black' : 'bg-gray-300'
                 }`}
               disabled={loading}
             >
@@ -127,8 +127,8 @@ export default function ShortLinkGenerator() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#6a0e95] cursor-pointer text-white py-3 px-6 rounded-lg font-medium 
-            hover:bg-[#5d0c89] focus:outline-none focus:ring-2 focus:ring-[#6c0f9e] focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="w-full bg-black cursor-pointer text-white py-3 px-6 rounded-lg font-medium 
+            hover:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -195,11 +195,11 @@ export default function ShortLinkGenerator() {
                     type="text"
                     value={result.shortUrl}
                     readOnly
-                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-indigo-600 font-medium"
+                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-black font-medium"
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="px-6 py-3 bg-[#6a0e95] text-white rounded-lg hover:bg-[#5d0c89] transition-colors font-medium whitespace-nowrap"
+                    className="px-6 py-3 cursor-pointer bg-black text-white rounded-lg hover:bg-gray-900 transition-colors font-medium whitespace-nowrap"
                   >
                     {copied ? '已复制 ✓' : '复制'}
                   </button>
@@ -224,7 +224,7 @@ export default function ShortLinkGenerator() {
                   <div className="text-center">
                     <button
                       onClick={downloadQrCode}
-                      className="mt-6 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                      className="cursor-pointer mt-6 px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors font-medium"
                     >
                       下载二维码
                     </button>
