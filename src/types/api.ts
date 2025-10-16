@@ -7,6 +7,7 @@ export interface ShortenRequest {
   url: string;
   /** 是否生成二维码，默认为 false */
   withQr?: boolean;
+  shortCode?: string;
 }
 
 /**

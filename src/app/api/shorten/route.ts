@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateShortCode, isValidUrl } from '@/lib/shortcode';
+import { generateShortCode, isValidUrl, isValidShortCode } from '@/lib/shortcode';
 import type { ShortenRequest, ShortenResponse } from '@/types/api';
 import QRCode from 'qrcode';
 
@@ -18,7 +18,7 @@ import QRCode from 'qrcode';
 export async function POST(request: NextRequest) {
   try {
     const body: ShortenRequest = await request.json();
-    const { url, withQr = false } = body;
+    const { url, withQr = false, shortCode } = body;
 
     // 验证输入
     if (!url || typeof url !== 'string') {
@@ -35,6 +35,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (shortCode && !isValidShortCode(shortCode)) {
+      return NextResponse.json(
+        { error: '自定义短码格式不正确：长度需在3-7字符之间，仅支持字母、数字、连字符和下划线' },
+        { status: 400 }
+      );
+    }
 
     // 检查是否已存在相同的原始链接
     let link = await prisma.link.findFirst({
@@ -43,26 +49,41 @@ export async function POST(request: NextRequest) {
 
     // 如果不存在，生成新的短码
     if (!link) {
-      let shortCode = generateShortCode();
-      
-      // 确保短码唯一性（虽然概率极低，但仍需检查）
-      let existingLink = await prisma.link.findUnique({
-        where: { shortCode },
-      });
+      let finalShortCode: string;
+      if (shortCode) {
+        //检查自定义短码是否被使用
+        const existingLink = await prisma.link.findUnique({
+          where: { shortCode }
+        })
+        if (existingLink) {
+          return NextResponse.json(
+            { error: '自定义短码已经被使用，请使用其他短码' },
+            { status: 409 }
+          );
+        }
+        finalShortCode = shortCode;
+      } else {
+        // 自动生成随机短码
+        finalShortCode = generateShortCode();
 
-      // 如果冲突，重新生成
-      while (existingLink) {
-        shortCode = generateShortCode();
-        existingLink = await prisma.link.findUnique({
-          where: { shortCode },
+        // 确保短码唯一性（虽然概率极低，但仍需检查）
+        let existingLink = await prisma.link.findUnique({
+          where: { shortCode: finalShortCode },
         });
-      }
 
+        // 如果冲突，重新生成
+        while (existingLink) {
+          finalShortCode = generateShortCode();
+          existingLink = await prisma.link.findUnique({
+            where: { shortCode: finalShortCode },
+          });
+        }
+      }
       // 创建新的短链接记录
       link = await prisma.link.create({
         data: {
           originalUrl: url,
-          shortCode,
+          shortCode: finalShortCode,
         },
       });
     }

@@ -32,3 +32,27 @@ export function isValidUrl(url: string): boolean {
   }
 }
 
+/**
+ * 验证短代码是否有效
+ * @param shortCode - 短链接代码
+ * @returns 是否为有效短码
+ */
+export function isValidShortCode(shortCode: string): boolean {
+  if (!shortCode || typeof shortCode !== 'string') return false;
+  const trimmedCode = shortCode.trim();
+  if (trimmedCode.length > 7 || trimmedCode.length < 3) return false;
+  // 检查字符类型：仅允许字母和数字
+  const validPattern = /^[a-zA-Z0-9_-]+$/;
+  if (!validPattern.test(trimmedCode)) return false;
+  return true;
+}
+
+/**
+ * 从 URL 中获取短链接代码
+ * @param url - 包含短链接代码的 URL 字符串
+ * @returns 短链接代码
+ */
+export function getShortCodeFromUrl(url: string): string {
+  const urlObj = new URL(url);
+  return urlObj.pathname.split('/').pop() || '';
+}

@@ -10,6 +10,7 @@ import { createShortLink } from '@/services/shortlink';
 export default function ShortLinkGenerator() {
   const [url, setUrl] = useState('');
   const [withQr, setWithQr] = useState(false);
+  const [shortCode, setShortCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ShortenResponse | null>(null);
   const [copied, setCopied] = useState(false);
@@ -31,7 +32,11 @@ export default function ShortLinkGenerator() {
     setCopied(false);
 
     try {
-      const data = await createShortLink({ url: url.trim(), withQr });
+      const data = await createShortLink({ 
+        url: url.trim(), 
+        withQr,
+        shortCode: shortCode.trim() || undefined
+      });
       setResult(data);
     } catch (error: unknown) {
       setResult({ error: (error as Error)?.message || '网络错误，请稍后重试' });
@@ -91,6 +96,28 @@ export default function ShortLinkGenerator() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
               disabled={loading}
             />
+          </div>
+
+          {/* 自定义短码输入框 */}
+          <div>
+            <label
+              htmlFor="shortcode-input"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              自定义短码（可选）
+            </label>
+            <input
+              id="shortcode-input"
+              type="text"
+              value={shortCode}
+              onChange={(e) => setShortCode(e.target.value)}
+              placeholder="如：my-link（留空则自动生成）"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              3-7个字符，仅支持字母、数字、连字符和下划线
+            </p>
           </div>
 
           {/* 二维码开关 */}
