@@ -1,5 +1,5 @@
 import { customAlphabet } from 'nanoid';
-
+import { prisma } from '@/lib/prisma'; 
 /**
  * 自定义字母表，排除易混淆字符（如 0、O、I、l 等）
  */
@@ -45,6 +45,26 @@ export function isValidShortCode(shortCode: string): boolean {
   const validPattern = /^[a-zA-Z0-9_-]+$/;
   if (!validPattern.test(trimmedCode)) return false;
   return true;
+}
+
+/**
+ * 短码唯一性检查
+ * @param shortCode - 短链接代码
+ * @returns 唯一短码
+ */
+export async function ensureUniqueShortCode(shortCode: string): Promise<string> {
+  let finalCode = shortCode;
+  let existingLink = await prisma.link.findUnique({
+    where: { shortCode: finalCode },
+  });
+
+  while (existingLink) {
+    finalCode = generateShortCode();
+    existingLink = await prisma.link.findUnique({
+      where: { shortCode: finalCode },
+    });
+  }
+  return finalCode;
 }
 
 /**
