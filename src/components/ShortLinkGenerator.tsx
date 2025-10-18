@@ -1,6 +1,5 @@
 'use client';
-
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent,useEffect } from 'react';
 import Image from 'next/image';
 import type { ShortenResponse } from '@/types/api';
 import { createShortLink } from '@/services/shortlink';
@@ -14,7 +13,7 @@ export default function ShortLinkGenerator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ShortenResponse | null>(null);
   const [copied, setCopied] = useState(false);
-
+  const [currentUrl, setCurrentUrl] = useState('');
   /**
    * 处理表单提交
    * @param e - 表单事件
@@ -32,8 +31,8 @@ export default function ShortLinkGenerator() {
     setCopied(false);
 
     try {
-      const data = await createShortLink({ 
-        url: url.trim(), 
+      const data = await createShortLink({
+        url: url.trim(),
         withQr,
         shortCode: shortCode.trim() || undefined
       });
@@ -44,7 +43,11 @@ export default function ShortLinkGenerator() {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentUrl(window.location.origin);  
+    }
+  }, []);
   /**
    * 复制短链接到剪贴板
    */
@@ -99,22 +102,40 @@ export default function ShortLinkGenerator() {
           </div>
 
           {/* 自定义短码输入框 */}
-          <div>
-            <label
-              htmlFor="shortcode-input"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              自定义短码（可选）
-            </label>
-            <input
-              id="shortcode-input"
-              type="text"
-              value={shortCode}
-              onChange={(e) => setShortCode(e.target.value)}
-              placeholder="如：my-link（留空则自动生成）"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
-              disabled={loading}
-            />
+          <div className='text-sm font-medium text-gray-700'>
+            <div className='flex gap-3 items-end'>
+              <div className='flex-1'>
+                <span>
+                  网址
+                </span>
+                <input
+                  id="shortcode-input"
+                  type="text"
+                  value={currentUrl ? `${currentUrl}` : ''}
+                  className="w-full px-4 py-3 border bg-gray-50 border-gray-300 rounded-lg outline-none text-gray-900 cursor-not-allowed"
+                  readOnly
+                  disabled
+                />
+              </div>
+              <div className='text-2xl flex items-center justify-center  h-12'>
+                /
+              </div>
+              <div className='flex-1'>
+                <span>
+                  自定义短链接
+                </span>
+                <input
+                  id="shortcode-input"
+                  type="text"
+                  value={shortCode}
+                  onChange={(e) => setShortCode(e.target.value)}
+                  placeholder="如：my-link（留空则自动生成）"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
             <p className="text-xs text-gray-500 mt-1">
               3-7个字符，仅支持字母、数字、连字符和下划线
             </p>
