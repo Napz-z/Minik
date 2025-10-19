@@ -33,3 +33,50 @@ export interface ApiErrorResponse {
   /** 详细错误信息（可选） */
   details?: string;
 }
+
+/**
+ * 短链接数据类型
+ */
+export interface Link {
+  id: number;
+  originalUrl: string;
+  shortCode: string;
+  createdAt: string;
+  visitCount: number;
+}
+
+/**
+ * 链接列表响应类型
+ */
+export interface LinksResponse {
+  links: Link[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+/**
+ * 用户类型
+ */
+export interface User {
+  id: string;
+  username: string;
+  role: 'admin' | 'guest';
+}
+
+/**
+ * 创建链接请求类型
+ */
+export interface CreateLinkRequest {
+  url: string;
+  shortCode?: string;
+}
+
+/**
+ * 更新链接请求类型
+ */
+export interface UpdateLinkRequest {
+  url?: string;
+  shortCode?: string;
+}

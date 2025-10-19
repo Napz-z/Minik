@@ -27,3 +27,26 @@ model Link {
   @@index([shortCode])
 }
 
+/// 用户表
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // 存储哈希后的密码
+  role      String   @default("admin") // admin 或 guest
+  createdAt DateTime @default(now())
+  sessions  Session[]
+
+  @@map("users")
+}
+
+/// 会话表
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
