@@ -12,16 +12,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-    }
-
-    if ((session.user as User).role !== 'admin') {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
-    }
-
     const linkId = parseInt(params.id);
     if (isNaN(linkId)) {
       return NextResponse.json({ error: '无效的链接ID' }, { status: 400 });
@@ -96,16 +86,6 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-    }
-
-    if ((session.user as User).role !== 'admin') {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
-    }
-
     const linkId = parseInt(params.id);
     if (isNaN(linkId)) {
       return NextResponse.json({ error: '无效的链接ID' }, { status: 400 });

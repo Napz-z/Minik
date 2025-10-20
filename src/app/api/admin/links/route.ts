@@ -9,12 +9,7 @@ import type{ User } from "@/types/api";
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
     
-    if (!session?.user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
@@ -67,16 +62,6 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-    }
-
-    if ((session.user as User).role !== 'admin') {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
-    }
-
     const body = await request.json();
     const { url, shortCode } = body;
 
