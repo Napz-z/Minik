@@ -265,6 +265,8 @@ export default function AdminPage() {
         isOpen={isFormOpen}
         onClose={handleFormClose}
         onSuccess={handleFormSuccess}
+        title={editingLink ? '编辑短链接' : '创建短链接'}
+        submitText={editingLink ? '更新' : '创建'}
       />
     </div>
   );

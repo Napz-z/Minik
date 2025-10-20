@@ -9,42 +9,76 @@ interface LinkFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  title?: string;
+  submitText?: string;
 }
 
-export default function LinkForm({ link, isOpen, onClose, onSuccess }: LinkFormProps) {
+export default function LinkForm({
+  link,
+  isOpen,
+  onClose,
+  onSuccess,
+  title,
+  submitText
+}: LinkFormProps) {
   const [formData, setFormData] = useState({
     url: '',
     shortCode: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const isEdit = !!link;
-
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+  // 保存当前的标题和按钮文字
+  const [currentTitle, setCurrentTitle] = useState('');
+  const [currentSubmitText, setCurrentSubmitText] = useState('');
+  //处理弹窗开关动画
   useEffect(() => {
-    if (link) {
-      setFormData({
-        url: link.originalUrl,
-        shortCode: link.shortCode
-      });
-    } else {
-      setFormData({
-        url: '',
-        shortCode: ''
-      });
-    }
-    setError('');
     if (isOpen) {
+      setShouldRender(true);
+      setTimeout(() => setIsAnimating(true), 10);
+      setCurrentTitle(title || '弹窗');
+      setCurrentSubmitText(submitText || '提交');
+    } else if (shouldRender) {
+      setIsAnimating(false);
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, title, submitText]);
+
+  // 处理滚动条（在组件渲染/卸载时执行）
+  useEffect(() => {
+    if (shouldRender) {
       const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollBarWidth}px`;
     }
-    // 页面卸载时还原
+
     return () => {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     };
-  }, [link, isOpen]);
+  }, [shouldRender]);
+
+  // 处理表单数据
+  useEffect(() => {
+    if (isOpen) {
+      if (link) {
+        setFormData({
+          url: link.originalUrl,
+          shortCode: link.shortCode
+        });
+      } else {
+        setFormData({
+          url: '',
+          shortCode: ''
+        });
+      }
+      setError('');
+    }
+  }, [isOpen, link]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +86,7 @@ export default function LinkForm({ link, isOpen, onClose, onSuccess }: LinkFormP
     setError('');
 
     try {
-      if (isEdit) {
+      if (link) {
         const updateData: UpdateLinkRequest = {};
         if (formData.url !== link.originalUrl) {
           updateData.url = formData.url;
@@ -80,13 +114,23 @@ export default function LinkForm({ link, isOpen, onClose, onSuccess }: LinkFormP
       setLoading(false);
     }
   };
-  if (!isOpen) return null;
+
+  if (!shouldRender) return null;
+
   return (
-    <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 ">
-      <div className="relative top-20 mx-auto p-5  w-96 shadow-lg rounded-md bg-white">
+    <div
+      className={`fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'
+        }`}
+      onClick={onClose}
+    >
+      <div
+        className={`p-5 w-96 shadow-lg rounded-md bg-white transition-all duration-300 ${isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-100'
+          }`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mt-3">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {isEdit ? '编辑短链接' : '创建短链接'}
+            {currentTitle}
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -144,7 +188,7 @@ export default function LinkForm({ link, isOpen, onClose, onSuccess }: LinkFormP
                 disabled={loading}
                 className="px-4 py-2 text-sm cursor-pointer font-medium text-white bg-black border border-transparent rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
               >
-                {loading ? '处理中...' : (isEdit ? '更新' : '创建')}
+                {loading ? '处理中...' : (currentSubmitText)}
               </button>
             </div>
           </form>
