@@ -32,6 +32,7 @@ export default function LinkForm({
   // 保存当前的标题和按钮文字
   const [currentTitle, setCurrentTitle] = useState('');
   const [currentSubmitText, setCurrentSubmitText] = useState('');
+  
   //处理弹窗开关动画
   useEffect(() => {
     if (isOpen) {

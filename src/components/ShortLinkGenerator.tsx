@@ -1,5 +1,5 @@
 'use client';
-import { useState, FormEvent,useEffect } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
 import type { ShortenResponse } from '@/types/api';
 import { createShortLink } from '@/services/shortlink';
@@ -44,9 +44,14 @@ export default function ShortLinkGenerator() {
     }
   };
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.origin);  
-    }
+    setCurrentUrl(window.location.origin);
+    
+    // 强制始终显示滚动条，避免页面抖动
+    document.documentElement.style.overflowY = 'scroll';
+    
+    return () => {
+      document.documentElement.style.overflowY = '';
+    };
   }, []);
   /**
    * 复制短链接到剪贴板
@@ -176,7 +181,7 @@ export default function ShortLinkGenerator() {
             type="submit"
             disabled={loading}
             className="w-full bg-black cursor-pointer text-white py-3 px-6 rounded-lg font-medium 
-            hover:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            hover:bg-gray-950 active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <span className="flex items-center justify-center">
