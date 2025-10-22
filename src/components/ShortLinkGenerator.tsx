@@ -244,12 +244,14 @@ export default function ShortLinkGenerator() {
                   短链接
                 </label>
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={result.shortUrl}
-                    readOnly
-                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-black font-medium"
-                  />
+                  <a
+                    href={result.shortUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-black font-medium hover:bg-gray-100 transition-colors cursor-pointer block"
+                  >
+                    {result.shortUrl}
+                  </a>
                   <button
                     onClick={copyToClipboard}
                     className="px-6 py-3 cursor-pointer bg-black text-white rounded-lg hover:bg-gray-900 transition-colors font-medium whitespace-nowrap"
