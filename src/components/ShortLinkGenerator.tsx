@@ -45,10 +45,6 @@ export default function ShortLinkGenerator() {
   };
   useEffect(() => {
     setCurrentUrl(window.location.origin);
-    
-    // 强制始终显示滚动条，避免页面抖动
-    document.documentElement.style.overflowY = 'scroll';
-    
     return () => {
       document.documentElement.style.overflowY = '';
     };
