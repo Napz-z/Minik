@@ -1,89 +1,89 @@
-# 📄 短链接生成网站
+#  Minik ⚡短链接生成服务
 
-基于 **Next.js** 的现代化短链接生成服务，支持二维码生成和链接管理。
+> 一款基于 **Next.js** 构建的现代化短链接生成平台，支持二维码生成、访问统计与后台管理。  
+> 简洁、快速、安全、可扩展。
+
+---
 
 ## ✨ 功能特性
 
-- 🔗 **短链接生成** - 将长链接转换为简短易分享的短链接
-- 📱 **二维码生成** - 可选生成短链接的二维码图片
-- 🚀 **快速跳转** - 自动重定向到原始链接
-- 📊 **访问统计** - 记录链接访问次数
-- 💎 **现代化 UI** - 简洁美观的用户界面
-- 📱 **响应式设计** - 完美适配 PC 和移动端
+- 🔗 **短链接生成**：将长链接转换为简短易分享的短网址  
+- 🎨 **自定义短码**：支持个性化短码设置  
+- 📱 **二维码生成**：一键生成并下载短链接二维码  
+- 🚀 **快速跳转**：访问短链接自动重定向至原始地址  
+- 📊 **访问统计**：记录每个链接的访问次数与趋势  
+- 🧩 **后台管理系统**：可视化管理短链接与用户权限  
+- 💎 **现代化 UI**：简洁美观、体验流畅  
+- 📲 **响应式设计**：完美适配 PC 与移动端  
+
+---
+## 📷 界面预览
+<img width="1518" height="791" alt="image" src="https://github.com/user-attachments/assets/070bfd0e-96a7-4908-9a8c-4dfdb36f1def" />
+
+## 轻量级管理面板：
+<img width="1632" height="845" alt="image" src="https://github.com/user-attachments/assets/d80082ae-b63c-4e9e-ad57-48c19b1a421c" />
 
 ## 🛠️ 技术栈
 
-- **前端框架**: Next.js
-- **开发语言**: TypeScript
-- **样式方案**: Tailwind CSS 4
-- **数据库**: MySQL
-- **ORM 工具**: Prisma
-- **二维码生成**: qrcode
-- **短码生成**: nanoid
+| 模块 | 技术 |
+|------|------|
+| 前端框架 | [Next.js](https://nextjs.org/) |
+| 后端服务 | Next.js API Routes |
+| 鉴权 | [NextAuth.js](https://next-auth.js.org/) |
+| 样式方案 | [Tailwind CSS](https://tailwindcss.com/) |
+| 数据库 | MySQL |
+| ORM 工具 | [Prisma](https://www.prisma.io/) |
 
-## 📦 安装依赖
+---
+
+## 📦 安装与运行
+
+### 1️⃣ 安装依赖
 
 ```bash
-# 使用 pnpm（推荐）
+# 推荐使用 pnpm
 pnpm install
 
-# 或使用 npm
+# 或使用 npm / yarn
 npm install
-
-# 或使用 yarn
+# 或
 yarn install
 ```
+2️⃣ 环境配置
 
-## ⚙️ 环境配置
-
-1. 复制环境变量示例文件：
+复制环境变量示例文件：
 
 ```bash
 cp .env.example .env
 ```
+修改 .env 文件内容：
 
-2. 编辑 `.env` 文件，配置数据库连接：
-
-```env
+```bash
 # 数据库连接字符串
-DATABASE_URL="mysql://用户名:密码@主机:端口/数据库名"
+DATABASE_URL="mysql://username:password@localhost:port/databaseName"
 
 # 网站基础 URL
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-3. 初始化数据库：
 
+🚀 启动项目
 ```bash
-# 生成 Prisma 客户端
-pnpm prisma:generate
-
-# 同步数据库结构
-pnpm prisma:push
-```
-
-## 🚀 运行项目
-
-### 开发模式
-
-```bash
+开发模式
 pnpm dev
 ```
+访问 http://localhost:3000
 
-访问 [http://localhost:3000](http://localhost:3000) 查看应用。
-
-### 生产构建
-
+生产部署
 ```bash
 # 构建项目
 pnpm build
 
-# 启动生产服务器
+# 启动生产环境
 pnpm start
 ```
 
-## 📚 Prisma 命令
-
+🧩 Prisma 命令
 ```bash
 # 生成 Prisma 客户端
 pnpm prisma:generate
@@ -91,68 +91,48 @@ pnpm prisma:generate
 # 同步数据库结构（开发环境）
 pnpm prisma:push
 
-# 打开 Prisma Studio（数据库管理界面）
+# 初始化默认数据
+pnpm prisma:seed
+
+# 启动可视化数据库管理界面
 pnpm prisma:studio
 ```
-
-## 📁 项目结构
-
-```
-Minik/
-├── src/                   # 源代码目录
-│   ├── app/               # Next.js App Router
-│   │   ├── api/           # API 路由
-│   │   │   └── shorten/   # 短链接生成 API
-│   │   ├── [code]/        # 动态路由（短链接跳转）
-│   │   ├── globals.css    # 全局样式
-│   │   ├── layout.tsx     # 根布局
-│   │   ├── page.tsx       # 首页
-│   │   └── not-found.tsx  # 404 页面
-│   ├── components/        # React 组件
-│   │   └── ShortLinkGenerator.tsx  # 短链接生成器组件
-│   └── lib/               # 工具库
-│       ├── prisma.ts      # Prisma 客户端
-│       └── shortcode.ts   # 短码生成工具
-├── prisma/                # Prisma 配置
-│   └── schema.prisma      # 数据库 Schema
-├── public/                # 静态资源
-
-```
-
-
 ## 🎨 使用说明
 
-1. **生成短链接**
-   - 在首页输入框中输入原始链接
-   - 可选择是否生成二维码
-   - 点击"生成短链接"按钮
+### 生成短链接
 
-2. **使用短链接**
-   - 复制生成的短链接
-   - 访问短链接会自动跳转到原始链接
+1. 在首页输入框中粘贴原始链接  
+2. 可选择是否生成二维码  
+3. 点击「生成短链接」按钮  
 
-3. **下载二维码**
-   - 点击"下载二维码"按钮保存图片
+### 使用短链接
 
-## 🚧 开发路线图
+1. 复制生成的短链接  
+2. 打开链接即可自动跳转至原始网址  
 
-### 🧩 核心功能
-- [x] 🔗 短链接生成
-- [x] 🧾 二维码生成与下载
-- [ ] ✏️ 自定义短码设置
-- [ ] ⏳ 链接过期时间设置
+### 下载二维码
 
-### 🧠 后台功能
-- [ ] 👤 登录与鉴权
-- [ ] 📋 链接管理面板
-- [ ] 📊 访问数据统计与图表展示
-
-> 💡 本项目仍在持续开发中，欢迎提交Issue或PR
-
-## 📄 License
-
-MIT License - 详见 [LICENSE](LICENSE) 文件
+1. 点击「下载二维码」按钮保存至本地  
 
 ---
 
-⚡ 快速、安全、高效的短链接服务
+## 🧭 开发路线图
+
+### ✅ 核心功能
+- 短链接生成  
+- 二维码生成与下载  
+- 自定义短码  
+
+### 🔐 后台功能
+- 登录与鉴权  
+- 链接管理面板  
+- 访问数据统计与图表展示  
+
+---
+
+## 💬 贡献指南
+
+欢迎提交 Issue 或 Pull Request，帮助改进项目！
+
+> 💡 快速而强大。
+> 用更优雅的方式分享链接，让你的内容传播更高效。
