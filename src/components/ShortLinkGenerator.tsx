@@ -161,7 +161,7 @@ export default function ShortLinkGenerator() {
               role="switch"
               aria-checked={withQr}
               onClick={() => setWithQr(!withQr)}
-              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${withQr ? 'bg-black' : 'bg-gray-300'
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 ${withQr ? 'bg-black' : 'bg-gray-300'
                 }`}
               disabled={loading}
             >
