@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/admin/Header';
 import Table, { Column, Action } from '@/components/common/Table';
 import LinkForm from '@/components/admin/LinkForm';
-import { fetchLinks, deleteLink } from '@/services/admin';
+import { fetchLinks, deleteLink, batchDeleteLinks } from '@/services/admin';
 import type { Link, LinksResponse, User } from '@/types/api';
 
 export default function AdminPage() {
@@ -26,6 +26,8 @@ export default function AdminPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isAdmin = (session?.user as User)?.role === 'admin';
 
   useEffect(() => {
@@ -86,6 +88,31 @@ export default function AdminPage() {
       alert('删除失败，请稍后重试');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedKeys.length === 0) {
+      alert('请先选择要删除的项');
+      return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedKeys.length} 个短链接吗？`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const ids = selectedKeys.map(key => Number(key));
+      await batchDeleteLinks(ids);
+      setSelectedKeys([]);
+      loadLinks();
+      alert('批量删除成功');
+    } catch (error) {
+      console.error('批量删除失败:', error);
+      alert(error instanceof Error ? error.message : '批量删除失败，请稍后重试');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -156,7 +183,7 @@ export default function AdminPage() {
 
   const actions: Action<Link>[] = [];
 
-    if (isAdmin) {
+  if (isAdmin) {
     actions.push({
       label: '编辑',
       onClick: handleEdit,
@@ -240,6 +267,22 @@ export default function AdminPage() {
               </button>
             </form>
           </div>
+
+          {/* 批量操作栏 */}
+          {isAdmin && selectedKeys.length > 0 && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
+              <div className="text-sm text-blue-700">
+                已选择 <span className="font-semibold">{selectedKeys.length}</span> 项
+              </div>
+              <button
+                onClick={handleBatchDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? '删除中...' : '批量删除'}
+              </button>
+            </div>
+          )}
 
           {/* 统计信息 */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -327,7 +370,8 @@ export default function AdminPage() {
                 columns={columns}
                 actions={actions.length > 0 ? actions : undefined}
                 rowKey="id"
-                emptyText="暂无数据"
+                selectable={isAdmin}
+                onSelectionChange={setSelectedKeys}
               />
 
               {/* 分页 */}

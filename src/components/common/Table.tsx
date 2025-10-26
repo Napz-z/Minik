@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 export interface Column<T> {
   key: string;
@@ -15,8 +15,8 @@ export interface Action<T> {
   onClick: (record: T) => void;
   className?: string;
   type?: 'primary' | 'danger' | 'default';  // 预设样式类型
-  isLoading?: (record: T) => boolean;  // 简化：只判断是否加载中
-  isDisabled?: (record: T) => boolean;  // 简化：只判断是否禁用
+  isLoading?: (record: T) => boolean;
+  isDisabled?: (record: T) => boolean;
 }
 
 interface TableProps<T> {
@@ -27,7 +27,8 @@ interface TableProps<T> {
   loading?: boolean;
   emptyText?: string;
   onRowClick?: (record: T) => void;
-  rowClassName?: string | ((record: T, index: number) => string);
+  selectable?: boolean;
+  onSelectionChange?: (selectedKeys: (string | number)[]) => void;
 }
 
 export default function Table<T extends Record<string, any>>({
@@ -38,8 +39,11 @@ export default function Table<T extends Record<string, any>>({
   loading = false,
   emptyText = '暂无数据',
   onRowClick,
-  rowClassName = 'hover:bg-gray-50'
+  selectable = false,
+  onSelectionChange,
 }: TableProps<T>) {
+  const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
+
   const getRowKey = (record: T, index: number): string | number => {
     if (typeof rowKey === 'function') {
       return rowKey(record);
@@ -47,12 +51,22 @@ export default function Table<T extends Record<string, any>>({
     return record[rowKey];
   };
 
-  const getRowClassName = (record: T, index: number): string => {
-    if (typeof rowClassName === 'function') {
-      return rowClassName(record, index);
-    }
-    return rowClassName;
+  const handleSelectAll = (checked: boolean) => {
+    const newSelectedKeys = checked ? data.map((record, index) => getRowKey(record, index)) : [];
+    setSelectedKeys(newSelectedKeys);
+    onSelectionChange?.(newSelectedKeys);
   };
+
+  const handleSelectRow = (key: string | number, checked: boolean) => {
+    const newSelectedKeys = checked 
+      ? [...selectedKeys, key]
+      : selectedKeys.filter(k => k !== key);
+    setSelectedKeys(newSelectedKeys);
+    onSelectionChange?.(newSelectedKeys);
+  };
+
+  const isAllSelected = data.length > 0 && selectedKeys.length === data.length;
+  const isIndeterminate = selectedKeys.length > 0 && selectedKeys.length < data.length;
 
   const renderCell = (column: Column<T>, record: T, index: number) => {
     if (column.render) {
@@ -99,6 +113,21 @@ export default function Table<T extends Record<string, any>>({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                {selectable && (
+                  <th className="px-6 py-3 text-left" style={{ width: '50px' }}>
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = isIndeterminate;
+                        }
+                      }}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                    />
+                  </th>
+                )}
                 {columns.map((column) => (
                   <th
                     key={column.key}
@@ -115,15 +144,32 @@ export default function Table<T extends Record<string, any>>({
                 )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {data.map((record, index) => (
-                <tr
-                  key={getRowKey(record, index)}
-                  className={getRowClassName(record, index)}
-                  onClick={() => onRowClick?.(record)}
-                  style={{ cursor: onRowClick ? 'pointer' : 'default' }}
-                >
-                  {columns.map((column) => (
+            <tbody className="bg-white divide-y divide-gray-200 ">
+              {data.map((record, index) => {
+                const key = getRowKey(record, index);
+                const isSelected = selectedKeys.includes(key);
+                
+                return (
+                  <tr
+                    key={key}
+                    onClick={() => onRowClick?.(record)}
+                    style={{ cursor: onRowClick ? 'pointer' : 'default' }}
+                    className='hover:bg-gray-50'
+                  >
+                    {selectable && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleSelectRow(key, e.target.checked);
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 cursor-pointer"
+                        />
+                      </td>
+                    )}
+                    {columns.map((column) => (
                     <td
                       key={column.key}
                       className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
@@ -156,7 +202,8 @@ export default function Table<T extends Record<string, any>>({
                     </td>
                   )}
                 </tr>
-              ))}
+              );
+            })}
             </tbody>
           </table>
         </div>

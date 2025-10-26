@@ -55,3 +55,21 @@ export function deleteLink(id: number) {
     method: 'DELETE',
   });
 }
+
+/**
+ * 批量删除链接
+ * @param ids - 链接ID数组
+ */
+export async function batchDeleteLinks(ids: number[]) {
+  // 并发删除所有选中的链接
+  const results = await Promise.allSettled(
+    ids.map(id => deleteLink(id))
+  );
+  
+  const failed = results.filter(r => r.status === 'rejected');
+  if (failed.length > 0) {
+    throw new Error(`删除失败: ${failed.length}/${ids.length} 项`);
+  }
+  
+  return { message: `成功删除 ${ids.length} 项` };
+}
