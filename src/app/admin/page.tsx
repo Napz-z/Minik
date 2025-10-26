@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/admin/Header';
-import LinkTable from '@/components/admin/LinkTable';
+import Table, { Column, Action } from '@/components/common/Table';
 import LinkForm from '@/components/admin/LinkForm';
-import { fetchLinks } from '@/services/admin';
+import { fetchLinks, deleteLink } from '@/services/admin';
 import type { Link, LinksResponse, User } from '@/types/api';
 
 export default function AdminPage() {
@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const isAdmin = (session?.user as User)?.role === 'admin';
 
   useEffect(() => {
@@ -70,6 +71,106 @@ export default function AdminPage() {
     setEditingLink(link);
     setIsFormOpen(true);
   };
+
+  const handleDelete = async (link: Link) => {
+    if (!confirm('确定要删除这个短链接吗？')) {
+      return;
+    }
+
+    setDeletingId(link.id);
+    try {
+      await deleteLink(link.id);
+      loadLinks();
+    } catch (error) {
+      console.error('删除失败:', error);
+      alert('删除失败，请稍后重试');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('已复制到剪贴板');
+    } catch (error) {
+      console.error('复制失败:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('zh-CN');
+  };
+
+  const columns: Column<Link>[] = [
+    {
+      key: 'shortCode',
+      title: '短码',
+      render: (value, record) => (
+        <div className="flex items-center">
+          <span className="text-sm font-medium text-gray-900">
+            {value}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(`${window.location.origin}/${value}`);
+            }}
+            className="ml-2 text-gray-400 hover:text-gray-600"
+            title="复制短链接"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+        </div>
+      ),
+      className: 'whitespace-nowrap'
+    },
+    {
+      key: 'originalUrl',
+      title: '原始链接',
+      render: (value) => (
+        <div className="text-sm text-gray-900 max-w-xs truncate" title={value}>
+          {value}
+        </div>
+      )
+    },
+    {
+      key: 'visitCount',
+      title: '访问次数',
+      render: (value) => (
+        <span className="text-sm text-gray-900">{value}</span>
+      ),
+      className: 'whitespace-nowrap'
+    },
+    {
+      key: 'createdAt',
+      title: '创建时间',
+      render: (value) => (
+        <span className="text-sm text-gray-500">{formatDate(value)}</span>
+      ),
+      className: 'whitespace-nowrap'
+    }
+  ];
+
+  const actions: Action<Link>[] = [];
+
+    if (isAdmin) {
+    actions.push({
+      label: '编辑',
+      onClick: handleEdit,
+      type: 'primary'  // 使用预设类型
+    });
+
+    actions.push({
+      label: '删除',
+      onClick: handleDelete,
+      type: 'danger',  // 使用预设类型
+      isLoading: (record) => deletingId === record.id,  // 简化
+      isDisabled: (record) => deletingId === record.id  // 简化
+    });
+  }
 
   const handleCreate = () => {
     setEditingLink(null);
@@ -221,11 +322,12 @@ export default function AdminPage() {
             </div>
           ) : (
             <>
-              <LinkTable
-                links={links}
-                onEdit={handleEdit}
-                onRefresh={loadLinks}
-                isAdmin={isAdmin}
+              <Table
+                data={links}
+                columns={columns}
+                actions={actions.length > 0 ? actions : undefined}
+                rowKey="id"
+                emptyText="暂无数据"
               />
 
               {/* 分页 */}
