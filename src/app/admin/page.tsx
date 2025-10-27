@@ -125,6 +125,7 @@ export default function AdminPage() {
     }
   };
 
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN');
   };
@@ -268,22 +269,6 @@ export default function AdminPage() {
             </form>
           </div>
 
-          {/* 批量操作栏 */}
-          {isAdmin && selectedKeys.length > 0 && (
-            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
-              <div className="text-sm text-blue-700">
-                已选择 <span className="font-semibold">{selectedKeys.length}</span> 项
-              </div>
-              <button
-                onClick={handleBatchDelete}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isDeleting ? '删除中...' : '批量删除'}
-              </button>
-            </div>
-          )}
-
           {/* 统计信息 */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -348,6 +333,25 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* 批量操作栏*/}
+          <div
+            className={`mb-4 transition-all duration-300 ease-in-out overflow-hidden ${isAdmin && selectedKeys.length > 0 ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+              }`}
+          >
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
+              <div className="text-sm text-gray-700">
+                已选择 <span className="font-semibold text-gray-600">{selectedKeys.length}</span> 项
+              </div>
+              <button
+                onClick={handleBatchDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {isDeleting ? '删除中...' : '批量删除'}
+              </button>
             </div>
           </div>
 
