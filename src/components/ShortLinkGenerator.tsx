@@ -1,8 +1,8 @@
 'use client';
 import { useState, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
-import type { ShortenResponse } from '@/types/api';
-import { createShortLink } from '@/services/shortlink';
+import type { ShortenResponse, ShortenRequest } from '@/types/api';
+import { request } from '@/lib/http';
 /**
  * 短链接生成器组件
  */
@@ -31,11 +31,7 @@ export default function ShortLinkGenerator() {
     setCopied(false);
 
     try {
-      const data = await createShortLink({
-        url: url.trim(),
-        withQr,
-        shortCode: shortCode.trim() || undefined
-      });
+      const data = await generateShortCode();
       setResult(data);
     } catch (error: unknown) {
       setResult({ error: (error as Error)?.message || '网络错误，请稍后重试' });
@@ -49,9 +45,24 @@ export default function ShortLinkGenerator() {
       document.documentElement.style.overflowY = '';
     };
   }, []);
+
+ // 生成短链接
+  const generateShortCode = async () => {
+    const data = await request<ShortenResponse, ShortenRequest>('/api/shorten', {
+      method: 'POST',
+      body: {
+        url: url.trim(),
+        withQr,
+        shortCode: shortCode.trim() || undefined
+      },
+      timeout: 8000
+    });
+    return data;
+  }
   /**
    * 复制短链接到剪贴板
    */
+  
   const copyToClipboard = async () => {
     if (result?.shortUrl) {
       try {

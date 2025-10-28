@@ -124,3 +124,50 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/**
+ * 批量删除短链接
+ * DELETE /api/admin/links
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { ids } = body;
+
+    // 验证输入
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json(
+        { error: '请提供有效的ID列表' },
+        { status: 400 }
+      );
+    }
+
+    // 验证所有ID都是数字
+    if (!ids.every(id => typeof id === 'number' && id > 0)) {
+      return NextResponse.json(
+        { error: 'ID必须是正整数' },
+        { status: 400 }
+      );
+    }
+
+    // 批量删除
+    const result = await prisma.link.deleteMany({
+      where: {
+        id: {
+          in: ids
+        }
+      }
+    });
+
+    return NextResponse.json({
+      message: `成功删除 ${result.count} 项`,
+      count: result.count
+    });
+  } catch (error) {
+    console.error('批量删除失败:', error);
+    return NextResponse.json(
+      { error: '服务器内部错误' },
+      { status: 500 }
+    );
+  }
+}

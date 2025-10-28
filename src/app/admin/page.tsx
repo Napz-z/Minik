@@ -7,7 +7,7 @@ import Header from '@/components/admin/Header';
 import Table, { Column, Action } from '@/components/common/Table';
 import Pagination from '@/components/common/Pagination';
 import LinkForm from '@/components/admin/LinkForm';
-import { fetchLinks, deleteLink, batchDeleteLinks } from '@/services/admin';
+import { request } from '@/lib/http';
 import type { Link, LinksResponse, User } from '@/types/api';
 
 export default function AdminPage() {
@@ -38,14 +38,7 @@ export default function AdminPage() {
   const loadLinks = async () => {
     setLoading(true);
     try {
-      const response: LinksResponse = await fetchLinks({
-        page: pagination.page,
-        pageSize: pagination.pageSize,
-        search: search || undefined,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
-      });
-
+      const response = await fetchLinksData(pagination, search);
       setLinks(response.links);
       setPagination(prev => ({
         ...prev,
@@ -60,6 +53,19 @@ export default function AdminPage() {
     }
   };
 
+
+  const fetchLinksData = async (pagination: { page: number; pageSize: number }, search: string) => {
+    const searchParams = new URLSearchParams();
+  
+    searchParams.set('page', pagination.page.toString());
+    searchParams.set('pageSize', pagination.pageSize.toString());
+    if (search) searchParams.set('search', search);
+    searchParams.set('sortBy', 'createdAt');
+    searchParams.set('sortOrder', 'desc');
+  
+    return await request<LinksResponse>(`/api/admin/links?${searchParams.toString()}`);
+    
+  }
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -82,7 +88,9 @@ export default function AdminPage() {
 
     setDeletingId(link.id);
     try {
-      await deleteLink(link.id);
+      await request<{ message: string }>(`/api/admin/links/${link.id}`, {
+        method: 'DELETE'
+      });
       loadLinks();
     } catch (error) {
       console.error('删除失败:', error);
@@ -105,7 +113,10 @@ export default function AdminPage() {
     setIsDeleting(true);
     try {
       const ids = selectedKeys.map(key => Number(key));
-      await batchDeleteLinks(ids);
+      await request<{ message: string; count: number }>('/api/admin/links', {
+        method: 'DELETE',
+        body: { ids }
+      });
       setSelectedKeys([]);
       loadLinks();
       alert('批量删除成功');

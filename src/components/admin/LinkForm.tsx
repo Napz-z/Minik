@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Link, CreateLinkRequest, UpdateLinkRequest } from '@/types/api';
-import { createLink, updateLink } from '@/services/admin';
+import { request } from '@/lib/http';
 
 interface LinkFormProps {
   link?: Link | null;
@@ -97,14 +97,20 @@ export default function LinkForm({
         }
 
         if (Object.keys(updateData).length > 0) {
-          await updateLink(link.id, updateData);
+          await request<Link>(`/api/admin/links/${link.id}`, {
+            method: 'PUT',
+            body: updateData
+          });
         }
       } else {
         const createData: CreateLinkRequest = {
           url: formData.url,
           shortCode: formData.shortCode || undefined
         };
-        await createLink(createData);
+        await request<Link>('/api/admin/links', {
+          method: 'POST',
+          body: createData
+        });
       }
 
       onSuccess();
