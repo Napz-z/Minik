@@ -34,7 +34,6 @@ model User {
   password  String   // 存储哈希后的密码
   role      String   @default("admin") // admin 或 guest
   createdAt DateTime @default(now())
-  sessions  Session[]
 
   @@map("users")
 }
