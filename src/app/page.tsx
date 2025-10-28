@@ -1,4 +1,4 @@
-import ShortLinkGenerator from '@/components/ShortLinkGenerator';
+import ShortLinkGenerator from '@/components/shortlink';
 
 /**
  * 首页组件
