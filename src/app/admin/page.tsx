@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/admin/Header';
 import SearchBar from '@/components/admin/SearchBar';
 import StatsCards from '@/components/admin/StatsCards';
+import Form, { FormField } from '@/components/common/Form';
 import Table, { Column, Action } from '@/components/common/Table';
 import Pagination from '@/components/common/Pagination';
-import LinkForm from '@/components/admin/LinkForm';
+import Dialog from '@/components/common/Dialog';
 import { request } from '@/lib/http';
-import type { Link, LinksResponse, User } from '@/types/api';
+import type { Link, LinksResponse, User, CreateLinkRequest, UpdateLinkRequest } from '@/types/api';
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -26,8 +27,47 @@ export default function AdminPage() {
     totalPages: 0
   });
   const [search, setSearch] = useState('');
+
+  // 表单弹窗状态
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
+  const [formData, setFormData] = useState<Record<string, string>>({ url: '', shortCode: '' });
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  // 表单字段配置
+  const linkFormFields: FormField[] = [
+    {
+      name: 'url',
+      label: '原始链接',
+      type: 'url',
+      placeholder: 'https://example.com',
+      required: true
+    },
+    {
+      name: 'shortCode',
+      label: '自定义短码',
+      type: 'text',
+      placeholder: '留空则自动生成',
+      required: false,
+      hint: '3-7个字符，仅支持字母、数字、连字符和下划线'
+    }
+  ];
+
+  // 确认对话框状态
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+  });
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -36,6 +76,21 @@ export default function AdminPage() {
   useEffect(() => {
     loadLinks();
   }, [pagination.page, pagination.pageSize, search]);
+
+  // 表单数据初始化
+  useEffect(() => {
+    if (isFormOpen) {
+      if (editingLink) {
+        setFormData({
+          url: editingLink.originalUrl,
+          shortCode: editingLink.shortCode
+        });
+      } else {
+        setFormData({ url: '', shortCode: '' });
+      }
+      setFormError('');
+    }
+  }, [isFormOpen, editingLink]);
 
   const loadLinks = async () => {
     setLoading(true);
@@ -55,19 +110,16 @@ export default function AdminPage() {
     }
   };
 
-
   const fetchLinksData = async (pagination: { page: number; pageSize: number }, search: string) => {
     const searchParams = new URLSearchParams();
-  
     searchParams.set('page', pagination.page.toString());
     searchParams.set('pageSize', pagination.pageSize.toString());
     if (search) searchParams.set('search', search);
     searchParams.set('sortBy', 'createdAt');
     searchParams.set('sortOrder', 'desc');
-  
     return await request<LinksResponse>(`/api/admin/links?${searchParams.toString()}`);
-    
-  }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -83,23 +135,82 @@ export default function AdminPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (link: Link) => {
-    if (!confirm('确定要删除这个短链接吗？')) {
-      return;
-    }
+  const handleCreate = () => {
+    setEditingLink(null);
+    setIsFormOpen(true);
+  };
 
-    setDeletingId(link.id);
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    // 延迟清空 editingLink，等 Dialog 关闭动画完成（300ms）
+    setTimeout(() => {
+      setEditingLink(null);
+    }, 300);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormLoading(true);
+    setFormError('');
+
     try {
-      await request<{ message: string }>(`/api/admin/links/${link.id}`, {
-        method: 'DELETE'
-      });
+      if (editingLink) {
+        const updateData: UpdateLinkRequest = {};
+        if (formData.url !== editingLink.originalUrl) {
+          updateData.url = formData.url;
+        }
+        if (formData.shortCode !== editingLink.shortCode) {
+          updateData.shortCode = formData.shortCode;
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          await request<Link>(`/api/admin/links/${editingLink.id}`, {
+            method: 'PUT',
+            body: updateData
+          });
+        }
+      } else {
+        const createData: CreateLinkRequest = {
+          url: formData.url,
+          shortCode: formData.shortCode || undefined
+        };
+        await request<Link>('/api/admin/links', {
+          method: 'POST',
+          body: createData
+        });
+      }
+
       loadLinks();
-    } catch (error) {
-      console.error('删除失败:', error);
-      alert('删除失败，请稍后重试');
+      handleFormClose();
+    } catch (error: any) {
+      setFormError(error.message || '操作失败，请稍后重试');
     } finally {
-      setDeletingId(null);
+      setFormLoading(false);
     }
+  };
+
+  const handleDelete = async (link: Link) => {
+    setConfirmDialog({
+      open: true,
+      title: '确认删除',
+      message: '确定要删除这个短链接吗？此操作无法撤销。',
+      confirmText: '删除',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        setDeletingId(link.id);
+        try {
+          await request<{ message: string }>(`/api/admin/links/${link.id}`, {
+            method: 'DELETE'
+          });
+          loadLinks();
+          alert('删除成功');
+        } catch (error) {
+          alert('删除失败');
+        } finally {
+          setDeletingId(null);
+        }
+      }
+    });
   };
 
   const handleBatchDelete = async () => {
@@ -108,37 +219,40 @@ export default function AdminPage() {
       return;
     }
 
-    if (!confirm(`确定要删除选中的 ${selectedKeys.length} 个短链接吗？`)) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      const ids = selectedKeys.map(key => Number(key));
-      await request<{ message: string; count: number }>('/api/admin/links', {
-        method: 'DELETE',
-        body: { ids }
-      });
-      setSelectedKeys([]);
-      loadLinks();
-      alert('批量删除成功');
-    } catch (error) {
-      console.error('批量删除失败:', error);
-      alert(error instanceof Error ? error.message : '批量删除失败，请稍后重试');
-    } finally {
-      setIsDeleting(false);
-    }
+    setConfirmDialog({
+      open: true,
+      title: '确认批量删除',
+      message: `确定要删除选中的 ${selectedKeys.length} 个短链接吗？此操作无法撤销。`,
+      confirmText: '删除',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, open: false }));
+        setIsDeleting(true);
+        try {
+          const ids = selectedKeys.map(key => Number(key));
+          await request<{ message: string; count: number }>('/api/admin/links', {
+            method: 'DELETE',
+            body: { ids }
+          });
+          setSelectedKeys([]);
+          loadLinks();
+         alert('批量删除成功');
+        } catch (error) {
+          alert('批量删除失败');
+        } finally {
+          setIsDeleting(false);
+        }
+      }
+    });
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('已复制到剪贴板');
+      alert('复制成功');
     } catch (error) {
-      console.error('复制失败:', error);
+      alert('复制失败');
     }
   };
-
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN');
@@ -202,31 +316,17 @@ export default function AdminPage() {
     actions.push({
       label: '编辑',
       onClick: handleEdit,
-      type: 'primary'  // 使用预设类型
+      type: 'primary'
     });
 
     actions.push({
       label: '删除',
       onClick: handleDelete,
-      type: 'danger',  // 使用预设类型
-      isLoading: (record) => deletingId === record.id,  // 简化
-      isDisabled: (record) => deletingId === record.id  // 简化
+      type: 'danger',
+      isLoading: (record) => deletingId === record.id,
+      isDisabled: (record) => deletingId === record.id
     });
   }
-
-  const handleCreate = () => {
-    setEditingLink(null);
-    setIsFormOpen(true);
-  };
-
-  const handleFormClose = () => {
-    setIsFormOpen(false);
-    setEditingLink(null);
-  };
-
-  const handleFormSuccess = () => {
-    loadLinks();
-  };
 
   if (status === 'loading') {
     return (
@@ -238,10 +338,14 @@ export default function AdminPage() {
       </div>
     );
   }
+
   if (status === 'unauthenticated') {
     router.push('/admin/login');
     return null;
   }
+
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -262,7 +366,6 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* 搜索栏 */}
           <SearchBar
             value={search}
             onChange={setSearch}
@@ -270,7 +373,6 @@ export default function AdminPage() {
             placeholder="搜索链接或短码..."
           />
 
-          {/* 统计信息 */}
           <StatsCards
             total={pagination.total}
             links={links}
@@ -320,7 +422,6 @@ export default function AdminPage() {
                 onSelectionChange={setSelectedKeys}
               />
 
-              {/* 分页 */}
               <Pagination
                 currentPage={pagination.page}
                 totalPages={pagination.totalPages}
@@ -333,15 +434,70 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* 表单模态框 */}
-      <LinkForm
-        link={editingLink}
-        isOpen={isFormOpen}
+      {/* 表单弹窗 */}
+      <Dialog
+        open={isFormOpen}
         onClose={handleFormClose}
-        onSuccess={handleFormSuccess}
         title={editingLink ? '编辑短链接' : '创建短链接'}
-        submitText={editingLink ? '更新' : '创建'}
-      />
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={handleFormClose}
+              disabled={formLoading}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              form="link-form"
+              disabled={formLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+            >
+              {formLoading ? '处理中...' : (editingLink ? '更新' : '创建')}
+            </button>
+          </>
+        }
+      >
+        <Form
+          formId="link-form"
+          fields={linkFormFields}
+          values={formData}
+          onChange={setFormData}
+          onSubmit={handleFormSubmit}
+          error={formError}
+          loading={formLoading}
+        />
+      </Dialog>
+
+      {/* 确认对话框 */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        title={confirmDialog.title}
+        size="sm"
+        footer={
+         (
+            <>
+              <button
+                onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmDialog.onConfirm}
+                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-black`}
+              >
+                {confirmDialog.confirmText || '确定'}
+              </button>
+            </>
+          )
+        }
+      >
+        <p className="text-sm text-gray-600">{confirmDialog.message}</p>
+      </Dialog>
     </div>
   );
 }
