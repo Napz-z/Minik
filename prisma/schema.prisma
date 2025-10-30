@@ -2,7 +2,7 @@
 // 数据库配置文件
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -19,7 +19,7 @@ model Link {
   /// 短链接代码（唯一标识）
   shortCode   String   @unique @db.VarChar(20)
   /// 创建时间
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @db.Timestamptz
   /// 访问次数（可选扩展功能）
   visitCount  Int      @default(0)
 
@@ -33,7 +33,7 @@ model User {
   username  String   @unique
   password  String   // 存储哈希后的密码
   role      String   @default("admin") // admin 或 guest
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
 
   @@map("users")
 }
