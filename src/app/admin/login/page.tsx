@@ -3,18 +3,16 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-
+import { useToast } from '@/components/common/Toast';
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
-
+  const { success, error } = useToast();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const result = await signIn('credentials', {
@@ -24,12 +22,13 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        setError('用户名或密码错误');
+        error('用户名或密码错误');
       } else {
+        success('登录成功');
         router.push('/admin');
       }
-    } catch (error) {
-      setError('登录失败，请稍后重试');
+    } catch (e) {
+      error('登录失败，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -37,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 bg-white rounded-lg p-8 shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Minik后台管理系统
@@ -82,17 +81,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-600 text-sm text-center">
-              {error}
-            </div>
-          )}
-
           <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group cursor-pointer relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center">

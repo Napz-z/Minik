@@ -3,6 +3,7 @@ import { useState, FormEvent, useEffect } from 'react';
 import Image from 'next/image';
 import type { ShortenResponse, ShortenRequest } from '@/types/api';
 import { request } from '@/lib/http';
+import { useToast } from '@/components/common/Toast';
 /**
  * 短链接生成器组件
  */
@@ -14,6 +15,7 @@ export default function ShortLinkGenerator() {
   const [result, setResult] = useState<ShortenResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
+  const { success, error } = useToast();
   /**
    * 处理表单提交
    * @param e - 表单事件
@@ -22,7 +24,7 @@ export default function ShortLinkGenerator() {
     e.preventDefault();
 
     if (!url.trim()) {
-      setResult({ error: '请输入有效的链接' });
+      error('请输入有效的链接', 'right');
       return;
     }
 
@@ -33,8 +35,9 @@ export default function ShortLinkGenerator() {
     try {
       const data = await generateShortCode();
       setResult(data);
-    } catch (error: unknown) {
-      setResult({ error: (error as Error)?.message || '网络错误，请稍后重试' });
+      success('短链接生成成功', 'right');
+    } catch (e: unknown) {
+      error((e as Error)?.message || '网络错误，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -46,7 +49,7 @@ export default function ShortLinkGenerator() {
     };
   }, []);
 
- // 生成短链接
+  // 生成短链接
   const generateShortCode = async () => {
     const data = await request<ShortenResponse, ShortenRequest>('/api/shorten', {
       method: 'POST',
@@ -62,15 +65,15 @@ export default function ShortLinkGenerator() {
   /**
    * 复制短链接到剪贴板
    */
-  
+
   const copyToClipboard = async () => {
     if (result?.shortUrl) {
       try {
         await navigator.clipboard.writeText(result.shortUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch (error) {
-        console.error('复制失败:', error);
+      } catch (e) {
+        error('复制失败', 'right');
       }
     }
   };

@@ -172,7 +172,7 @@ export default function Table<T extends Record<string, any>>({
                     {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
+                      className={`px-6 py-4 whitespace-nowrap  ${column.className || ''}`}
                     >
                       {renderCell(column, record, index)}
                     </td>

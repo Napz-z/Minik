@@ -16,6 +16,7 @@
   width: 10px;
   height: 10px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(93, 93, 93, 0.6);
   border-radius: 5px;
@@ -24,6 +25,10 @@
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+html{
+  scrollbar-gutter: stable;
 }
 
 body {

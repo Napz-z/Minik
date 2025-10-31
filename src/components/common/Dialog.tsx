@@ -39,14 +39,10 @@ export default function Dialog({
   // 处理滚动条（在组件渲染/卸载时执行）
   useEffect(() => {
     if (shouldRender) {
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollBarWidth}px`;
     }
-
     return () => {
       document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
     };
   }, [shouldRender]);
 

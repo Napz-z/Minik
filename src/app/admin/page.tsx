@@ -11,15 +11,15 @@ import Table, { Column, Action } from '@/components/common/Table';
 import Pagination from '@/components/common/Pagination';
 import Dialog from '@/components/common/Dialog';
 import { request } from '@/lib/http';
+import { useToast } from '@/components/common/Toast';
 import type { Link, LinksResponse, User, CreateLinkRequest, UpdateLinkRequest } from '@/types/api';
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const { success, error, info } = useToast();
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -102,9 +102,8 @@ export default function AdminPage() {
         total: response.total,
         totalPages: response.totalPages
       }));
-    } catch (error) {
-      console.error('加载链接失败:', error);
-      setError('加载数据失败，请稍后重试');
+    } catch (e) {
+      error("加载链接失败")
     } finally {
       setLoading(false);
     }
@@ -168,6 +167,7 @@ export default function AdminPage() {
             method: 'PUT',
             body: updateData
           });
+          success("更新成功");
         }
       } else {
         const createData: CreateLinkRequest = {
@@ -178,6 +178,7 @@ export default function AdminPage() {
           method: 'POST',
           body: createData
         });
+        success("创建成功");
       }
 
       loadLinks();
@@ -203,9 +204,9 @@ export default function AdminPage() {
             method: 'DELETE'
           });
           loadLinks();
-          alert('删除成功');
-        } catch (error) {
-          alert('删除失败');
+          success("刪除成功");
+        } catch (e) {
+          error('删除失败');
         } finally {
           setDeletingId(null);
         }
@@ -215,7 +216,7 @@ export default function AdminPage() {
 
   const handleBatchDelete = async () => {
     if (selectedKeys.length === 0) {
-      alert('请先选择要删除的项');
+      info('请先选择要删除的项');
       return;
     }
 
@@ -235,9 +236,9 @@ export default function AdminPage() {
           });
           setSelectedKeys([]);
           loadLinks();
-         alert('批量删除成功');
-        } catch (error) {
-          alert('批量删除失败');
+          success('批量删除成功');
+        } catch (e) {
+          error('批量删除失败');
         } finally {
           setIsDeleting(false);
         }
@@ -248,9 +249,9 @@ export default function AdminPage() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('复制成功');
-    } catch (error) {
-      alert('复制失败');
+      success('复制成功');
+    } catch (e) {
+      error('复制失败');
     }
   };
 
@@ -398,14 +399,6 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-
-          {/* 链接列表 */}
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="text-sm text-red-600">{error}</div>
-            </div>
-          )}
-
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
@@ -478,7 +471,7 @@ export default function AdminPage() {
         title={confirmDialog.title}
         size="sm"
         footer={
-         (
+          (
             <>
               <button
                 onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
