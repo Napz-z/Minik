@@ -46,7 +46,7 @@ export default function LoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-2 rounded-md shadow-sm ">
+          <div className="space-y-2">
             <div>
               <label htmlFor="username" className="sr-only">
                 用户名
@@ -56,7 +56,7 @@ export default function LoginPage() {
                 name="username"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
+                className="outline-none transition-all rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:ring-2 focus:ring-black  sm:text-sm"
                 placeholder="用户名"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -72,7 +72,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
+                className="outline-none transition-all rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:ring-2 focus:ring-black  sm:text-sm"
                 placeholder="密码"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

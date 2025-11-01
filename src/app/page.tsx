@@ -5,7 +5,7 @@ import ShortLinkGenerator from '@/components/shortlink';
  */
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gray-100">
       {/* 头部标题 */}
       <header className="pt-10 pb-8 text-center">
         <h1 className="text-5xl font-bold text-gray-800 mb-4">
