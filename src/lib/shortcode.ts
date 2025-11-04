@@ -8,11 +8,11 @@ const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 /**
  * 生成指定长度的短码
  */
-const nanoid = customAlphabet(alphabet, 7);
+const nanoid = customAlphabet(alphabet, 6);
 
 /**
  * 生成唯一短链接代码
- * @returns 7位短码字符串
+ * @returns 6位短码字符串
  */
 export function generateShortCode(): string {
   return nanoid();
