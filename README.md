@@ -15,24 +15,25 @@
 - 🧩 **后台管理系统**：可视化管理短链接与用户权限  
 - 💎 **现代化 UI**：简洁美观、体验流畅  
 - 📲 **响应式设计**：完美适配 PC 与移动端  
-
+- ⚙️ **组件封裝**：手动封装Toast、Dialog、Form 等组件，交互丝滑流畅
 ---
 ## 📷 界面预览
-<img width="1518" height="791" alt="image" src="https://github.com/user-attachments/assets/070bfd0e-96a7-4908-9a8c-4dfdb36f1def" />
+<img width="1099" height="673" alt="image" src="https://github.com/user-attachments/assets/eb42138e-3652-4e31-9e40-9ade56eef9f5" />
+
 
 ## 轻量级管理面板：
-<img width="1632" height="845" alt="image" src="https://github.com/user-attachments/assets/d80082ae-b63c-4e9e-ad57-48c19b1a421c" />
+<img width="1458" height="940" alt="image" src="https://github.com/user-attachments/assets/1c330cb7-8b69-4780-99ec-6b87e6f25222" />
+
 
 ## 🛠️ 技术栈
 
 | 模块 | 技术 |
 |------|------|
-| 前端框架 | [Next.js](https://nextjs.org/) |
-| 后端服务 | Next.js API Routes |
+| 框架 | [Next.js](https://nextjs.org/) |
 | 鉴权 | [NextAuth.js](https://next-auth.js.org/) |
 | 样式方案 | [Tailwind CSS](https://tailwindcss.com/) |
-| 数据库 | MySQL |
-| ORM 工具 | [Prisma](https://www.prisma.io/) |
+| 数据库 | [Postgresql](https://www.postgresql.org/) |
+| ORM | [Prisma](https://www.prisma.io/) |
 
 ---
 
@@ -41,11 +42,8 @@
 ### 1️⃣ 安装依赖
 
 ```bash
-# 推荐使用 pnpm
-pnpm install
-
-# 或使用 npm / yarn
-npm install
+# 使用 npm / pnpm（推荐使用）
+npm install / pnpm install
 # 或
 yarn install
 ```
@@ -60,7 +58,15 @@ cp .env.example .env
 
 ```bash
 # 数据库连接字符串
-DATABASE_URL="mysql://username:password@localhost:port/databaseName"
+DATABASE_URL="postgresql://用戶名:密碼@localhost:5432/minik"
+
+# 管理员账号配置
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="your-secure-password"
+
+# NextAuth.js 配置
+NEXTAUTH_SECRET="your-nextauth-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
 
 # 网站基础 URL
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
@@ -69,10 +75,19 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
 🚀 启动项目
 ```bash
+# 生成 Prisma 客户端
+pnpm prisma:generate
+
+# 同步数据库结构
+prisma:push
+
+# 初始化默认数据
+pnpm prisma:seed
+
 开发模式
 pnpm dev
 ```
-访问 http://localhost:3000
+> 访问 http://localhost:3000
 
 生产部署
 ```bash
@@ -132,7 +147,11 @@ pnpm prisma:studio
 
 ## 💬 贡献指南
 
-欢迎提交 Issue 或 Pull Request，帮助改进项目！
+欢迎提交 Issue 或 Pull Request
 
 > 💡 快速而强大。
-> 用更优雅的方式分享链接，让你的内容传播更高效。
+> 用更优雅的方式分享链接，让你的内容传播更高效
+
+## 📜 声明
+
+> 本在线网站只用于项目展示，随时可能关闭，并不保证绝对的可用性，切勿用于商业用途或非法传播，因此产生的任何纠纷与本人无关。
