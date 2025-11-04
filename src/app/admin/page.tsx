@@ -359,7 +359,7 @@ export default function AdminPage() {
               {isAdmin && (
                 <button
                   onClick={handleCreate}
-                  className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                  className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer"
                 >
                   创建短链接
                 </button>

@@ -41,7 +41,7 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md enabled:hover:bg-black enabled:hover:text-white enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-3 py-2 md:text-sm whitespace-nowrap font-medium text-gray-500 bg-white border border-gray-300 rounded-md enabled:hover:bg-black enabled:hover:text-white enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           上一页
         </button>
@@ -57,7 +57,7 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md enabled:hover:bg-black enabled:hover:text-white enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-3 py-2 text-sm whitespace-nowrap font-medium text-gray-500 bg-white border border-gray-300 rounded-md enabled:hover:bg-black enabled:hover:text-white enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           下一页
         </button>
