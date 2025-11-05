@@ -16,6 +16,7 @@ export default function ShortLinkGenerator() {
   const [copied, setCopied] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
   const { success, error } = useToast();
+  const [isMobile, setIsMobile] = useState(false);
   /**
    * 处理表单提交
    * @param e - 表单事件
@@ -47,6 +48,16 @@ export default function ShortLinkGenerator() {
     return () => {
       document.documentElement.style.overflowY = '';
     };
+  }, []);
+
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  useEffect(() => {
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // 生成短链接
@@ -144,7 +155,7 @@ export default function ShortLinkGenerator() {
                   type="text"
                   value={shortCode}
                   onChange={(e) => setShortCode(e.target.value)}
-                  placeholder="如：my-link（留空则自动生成）"
+                  placeholder={isMobile ? "如：my-link" : "如：my-link（留空则自动生成）"}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-gray-900"
                   disabled={loading}
                 />
