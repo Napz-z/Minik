@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "短链接管理系统",
-  description: "简洁高效的短链接生成和管理系统",
+  title: "Minik短链接生成器",
+  description: "简洁高效的短链接生成",
 };
 
 export default function RootLayout({
