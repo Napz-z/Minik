@@ -438,7 +438,7 @@ export default function AdminPage() {
               type="button"
               onClick={handleFormClose}
               disabled={formLoading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
             >
               取消
             </button>
@@ -446,7 +446,7 @@ export default function AdminPage() {
               type="submit"
               form="link-form"
               disabled={formLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-black border border-transparent rounded-md hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {formLoading ? '处理中...' : (editingLink ? '更新' : '创建')}
             </button>
@@ -475,13 +475,13 @@ export default function AdminPage() {
             <>
               <button
                 onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 取消
               </button>
               <button
                 onClick={confirmDialog.onConfirm}
-                className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-black`}
+                className={`cursor-pointer px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md disabled:opacity-50 disabled:cursor-not-allowed bg-black`}
               >
                 {confirmDialog.confirmText || '确定'}
               </button>

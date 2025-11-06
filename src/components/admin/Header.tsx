@@ -23,7 +23,7 @@ export default function Header() {
             </h1>
           </div>
 
-          <div className="flex items-center ">
+          <div className="flex items-center gap-2">
             <div className="text-sm text-gray-700 ">
               欢迎，{(session?.user as User)?.username}
               <span className="ml-2 whitespace-nowrap px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
