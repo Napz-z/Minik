@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateShortCode, isValidUrl, isValidShortCode,ensureUniqueShortCode } from '@/lib/shortcode';
+import { generateShortCode, isValidUrl, isValidShortCode, ensureUniqueShortCode } from '@/lib/shortcode';
 import type { ShortenRequest, ShortenResponse } from '@/types/api';
 import QRCode from 'qrcode';
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
     let finalShortCode: string;
-     //检查自定义短码是否被使用
+    //检查自定义短码是否被使用
     if (shortCode) {
       const existingLink = await prisma.link.findUnique({
         where: { shortCode }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       },
     });
     // 构建短链接 URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = new URL(request.url).origin;
     const shortUrl = `${baseUrl}/${link.shortCode}`;
 
     // 准备响应数据
